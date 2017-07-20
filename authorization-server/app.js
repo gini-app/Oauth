@@ -25,6 +25,9 @@ const app = express();
 app.set('view engine', 'ejs');
 app.use(cookieParser());
 
+// mysql configuration
+app.set('db', db);
+
 // Session Configuration
 app.use(expressSession({
   saveUninitialized : true,

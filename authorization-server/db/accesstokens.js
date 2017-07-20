@@ -1,7 +1,8 @@
 'use strict';
 
 const jwt = require('jsonwebtoken');
-
+const db = require('../db');
+const _ = require('lodash');
 // The access tokens.
 // You will use these to access your end point data through the means outlined
 // in the RFC The OAuth 2.0 Authorization Framework: Bearer Token Usage

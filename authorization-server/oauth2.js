@@ -31,8 +31,8 @@ const expiresIn = { expires_in : config.token.expiresIn };
  * which is bound to these values, and will be exchanged for an access token.
  */
 server.grant(oauth2orize.grant.code((client, redirectURI, user, ares, done) => {
-  const code = utils.createToken({ sub : user.id, exp : config.codeToken.expiresIn });
-  db.authorizationCodes.save(code, client.id, redirectURI, user.id, client.scope)
+  const code = utils.createToken({ sub : user.user_id, exp : config.codeToken.expiresIn });
+  db.authorizationCodes.save(code, client.id, redirectURI, user.user_id, client.scope)
   .then(() => done(null, code))
   .catch(err => done(err));
 }));
@@ -46,10 +46,10 @@ server.grant(oauth2orize.grant.code((client, redirectURI, user, ares, done) => {
  * which is bound to these values.
  */
 server.grant(oauth2orize.grant.token((client, user, ares, done) => {
-  const token      = utils.createToken({ sub : user.id, exp : config.token.expiresIn });
+  const token      = utils.createToken({ sub : user.user_id, exp : config.token.expiresIn });
   const expiration = config.token.calculateExpirationDate();
 
-  db.accessTokens.save(token, expiration, user.id, client.id, client.scope)
+  db.accessTokens.save(token, expiration, user.user_id, client.id, client.scope)
   .then(() => done(null, token, expiresIn))
   .catch(err => done(err));
 }));
@@ -88,7 +88,7 @@ server.exchange(oauth2orize.exchange.code((client, code, redirectURI, done) => {
 server.exchange(oauth2orize.exchange.password((client, username, password, scope, done) => {
   db.users.findByUsername(username)
   .then(user => validate.user(user, password))
-  .then(user => validate.generateTokens({ scope, userID: user.id, clientID: client.id }))
+  .then(user => validate.generateTokens({ scope, userID: user.user_id, clientID: client.id }))
   .then((tokens) => {
     if (tokens === false) {
       return done(null, false);

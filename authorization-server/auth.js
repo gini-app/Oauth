@@ -86,7 +86,7 @@ passport.use(new BearerStrategy((accessToken, done) => {
 // the client by ID from the database.
 
 passport.serializeUser((user, done) => {
-  done(null, user.id);
+  done(null, user.user_id);
 });
 
 passport.deserializeUser((id, done) => {

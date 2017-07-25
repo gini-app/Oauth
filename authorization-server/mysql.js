@@ -1,5 +1,5 @@
 const knex = require('knex');
-const config = require('./config/default.json');
+const config = require('config');
 
-const db = knex({ client : config.client, connection: config.connection, pool: config.pool, debug:true });
+const db = knex({ client : config.get('client'), connection: config.get('connection'), pool: config.get('pool'), debug:true });
 module.exports = db;

@@ -33,7 +33,7 @@ const users = [{
 // exports.find = id => Promise.resolve(users.find(user => user.id === id));
 
 exports.find = (id) => {
-  return db.from('auth-users').first('*').where('id', id).then(row => {
+  return db.from('auth-users').first('*').where('user_id', id).then(row => {
     return Promise.resolve(row);
   })
 };

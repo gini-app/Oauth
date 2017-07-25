@@ -42,7 +42,7 @@ const clients = [{
  * @param   {String}   id   - The unique id of the client to find
  * @returns {Promise}  resolved promise with the client if found, otherwise undefined
  */
-exports.find = id => Promise.resolve(clients.find(client => client.user_id === id));
+exports.find = id => Promise.resolve(clients.find(client => client.id === id));
 
 /**
  * Returns a client if it finds one, otherwise returns null if a client is not found.

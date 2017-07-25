@@ -14,6 +14,7 @@ const oauth2orize = require('oauth2orize');
 const passport    = require('passport');
 const utils       = require('./utils');
 const validate    = require('./validate');
+const _           = require('lodash');
 
 // create OAuth 2.0 server
 const server = oauth2orize.createServer();
@@ -212,6 +213,34 @@ exports.token = [
   passport.authenticate(['basic', 'oauth2-client-password'], { session: false }),
   server.token(),
   server.errorHandler(),
+];
+
+/**
+ * Register endpoint
+ *
+ * `token` middleware handles client requests to exchange authorization grants
+ * for access tokens.  Based on the grant type being exchanged, the above
+ * exchange middleware will be invoked to handle the request.  Clients must
+ * authenticate when making requests to this endpoint.
+ */
+exports.register = [
+  (req, res, next) => {
+    if (_.has(req, 'body') && _.has(req.body, 'username') && _.has(req.body, 'password') && _.has(req.body, 'name')) {
+      db.users.findByUsername(req.body.username).then((userObj) => {
+        if (_.isNull(userObj) && _.size(userObj) > 0) {
+          db.users.register(req.body.username, req.body.password, req.body.name).then((returnUserObj) => {
+            res.json(_.assign({}, returnUserObj, { status:'success' }));
+          });
+        } else {
+          res.json(_.assign({}, req.body, { status:'error', error:'duplicate_username' }));
+        }
+        next();
+      })
+    } else {
+      console.log(req);
+      console.log('error');
+    }
+  },
 ];
 
 // Register serialialization and deserialization functions.

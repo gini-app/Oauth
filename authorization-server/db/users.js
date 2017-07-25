@@ -13,6 +13,7 @@ const _ = require('lodash');
  * password : The password of your user
  * name     : The name of your user
  */
+/*
 const users = [{
   id       : '1',
   username : 'bob',
@@ -24,7 +25,7 @@ const users = [{
   password : 'password',
   name     : 'Joe Davis',
 }];
-
+*/
 /**
  * Returns a user if it finds one, otherwise returns null if a user is not found.
  * @param   {String}   id - The unique id of the user to find
@@ -52,4 +53,20 @@ exports.findByUsername = (username) => {
     // console.log(row);
     return Promise.resolve(row);
   });
+};
+
+/**
+ * Returns a user if it finds one, otherwise returns null if a user is not found.
+ * @param   {String}   username - The unique user name to find
+ * @param   {Function} done     - The user if found, otherwise returns undefined
+ * @returns {Promise} resolved user if found, otherwise resolves undefined
+ */
+/*
+exports.findByUsername = username =>
+  Promise.resolve(users.find(user => user.username === username));
+  */
+exports.register = (username, password, name) => {
+  return db.from('auth-users').returning('*').insert({ username: username, password: password, name: name })
+  .then(userId => db.from('auth-users').first('*').where('user_id', userId))
+  .then((userObj) => Promise.resolve(userObj));
 };

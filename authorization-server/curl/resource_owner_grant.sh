@@ -13,4 +13,4 @@
 #   "token_type" : "Bearer"
 # }
 
-curl --insecure --user 'abc123:ssh-secret' 'https://localhost:3000/oauth/token/' --data 'grant_type=password&username=bob&password=secret&scope=offline_access'
+curl --insecure --user 'abc123:ssh-secret' 'https://localhost:8080/oauth/token/' --data 'grant_type=password&username=bob&password=secret&scope=offline_access'

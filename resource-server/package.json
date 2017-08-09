@@ -10,6 +10,7 @@
     "url": "https://github.com/FrankHassanabad/Oauth2orizeRecipes.git"
   },
   "dependencies": {
+    "bcrypt": "^1.0.2",
     "express": "^4.10.x",
     "express-session": "^1.9.x",
     "ejs": "^2.5.x",

@@ -2,6 +2,7 @@
 
 const db = require('../mysql');
 const _ = require('lodash');
+const bcrypt = require('bcrypt');
 
 /**
  * This is the configuration of the users that are allowed to connected to your authorization
@@ -66,7 +67,9 @@ exports.findByUsername = username =>
   Promise.resolve(users.find(user => user.username === username));
   */
 exports.register = (username, password, name) => {
-  return db.from('auth-users').returning('*').insert({ username: username, password: password, name: name })
+  return bcrypt.hash(password, 12).then((bcryptPassword) => {
+    return db.from('auth-users').returning('*').insert({ username:username, password: bcryptPassword, name: name })
+  })
   .then(userId => db.from('auth-users').first('*').where('user_id', userId))
   .then((userObj) => Promise.resolve(userObj));
 };

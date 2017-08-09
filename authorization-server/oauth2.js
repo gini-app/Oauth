@@ -226,12 +226,13 @@ exports.token = [
 exports.register = [
   (req, res, next) => {
     if (_.has(req, 'body') && _.has(req.body, 'username') && _.has(req.body, 'password') && _.has(req.body, 'name')) {
-      db.users.findByUsername(req.body.username).then((userObj) => {
-        if (_.isNull(userObj) && _.size(userObj) > 0) {
-          db.users.register(req.body.username, req.body.password, req.body.name).then((returnUserObj) => {
+      return db.users.findByUsername(req.body.username).then((userObj) => {
+        if (_.isUndefined(userObj) || _.isNull(userObj)) {
+          return db.users.register(req.body.username, req.body.password, req.body.name).then((returnUserObj) => {
             res.json(_.assign({}, returnUserObj, { status:'success' }));
           });
         } else {
+          console.log(userObj);
           res.json(_.assign({}, req.body, { status:'error', error:'duplicate_username' }));
         }
         next();

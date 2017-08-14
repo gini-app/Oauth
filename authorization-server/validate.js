@@ -4,6 +4,7 @@ const config  = require('./config');
 const db      = require('./db');
 const utils   = require('./utils');
 const process = require('process');
+const bcrypt  = require('bcrypt');
 
 /** Validate object to attach all functions to  */
 const validate = Object.create(null);
@@ -33,11 +34,41 @@ validate.logAndThrow = (msg) => {
  * @returns {Object} The user if valid
  */
 validate.user = (user, password) => {
-  validate.userExists(user);
-  if (user.password !== password) {
+  console.log('here cp1');
+  let theUser = validate.userExists(user);
+  console.log(theUser);
+  if(theUser){
+    console.log('here bcrypt');
+    return bcrypt.compare(password, theUser.password).then((result) => {
+      console.log('result');
+      console.log(result);
+      if(result){
+        return user;
+      } else {
+        return validate.logAndThrow('User password does not match');
+      }
+    });
+  }
+
+  /*
+  return validate.userExists(user).then((theuser) => {
+    console.log('here bcrypt');
+    return bcrypt.compare(password, theuser.password);
+  }).then((result) => {
+    if (result) {
+      return user;
+    } else {
+      return validate.logAndThrow('User password does not match');
+    }
+  });
+  */
+  /*
+  if (bcrypt.compareSync(password, user.password)) {
     validate.logAndThrow('User password does not match');
   }
+
   return user;
+  */
 };
 
 /**
@@ -47,6 +78,7 @@ validate.user = (user, password) => {
  * @returns {Object} The user if valid
  */
 validate.userExists = (user) => {
+  console.log(user);
   if (user == null) {
     validate.logAndThrow('User does not exist');
   }

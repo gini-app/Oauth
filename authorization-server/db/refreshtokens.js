@@ -1,6 +1,7 @@
 'use strict';
 
 const jwt = require('jsonwebtoken');
+const db = require('../mysql');
 
 // The refresh tokens.
 // You will use these to get access tokens to access your end point data through the means outlined
@@ -10,7 +11,7 @@ const jwt = require('jsonwebtoken');
 /**
  * Tokens in-memory data structure which stores all of the refresh tokens
  */
-let tokens = Object.create(null);
+// let tokens = Object.create(null);
 
 /**
  * Returns a refresh token if it finds one, otherwise returns null if one is not found.
@@ -20,7 +21,8 @@ let tokens = Object.create(null);
 exports.find = (token) => {
   try {
     const id = jwt.decode(token).jti;
-    return Promise.resolve(tokens[id]);
+    return db.from('auth-refresh-token').first('*').where('refresh_token_id', id).andWhere('is_token_deleted', 0)
+    .then(refreshTokenObj => Promise.resolve(refreshTokenObj));
   } catch (error) {
     return Promise.resolve(undefined);
   }
@@ -38,8 +40,10 @@ exports.find = (token) => {
  */
 exports.save = (token, userID, clientID, scope) => {
   const id = jwt.decode(token).jti;
-  tokens[id] = { userID, clientID, scope };
-  return Promise.resolve(tokens[id]);
+  console.log('refreshtoken save');
+  return db('auth-refresh-token').returning('token_id').insert({ token_id: id, user_id: userID, client_id: clientID, scope, is_token_deleted: 0 })
+  .then(tokenId => db('auth-refresh-token').first('*').where('token_id', tokenId))
+  .then(tokenObj => Promise.resolve(tokenObj));
 };
 
 /**
@@ -50,9 +54,10 @@ exports.save = (token, userID, clientID, scope) => {
 exports.delete = (token) => {
   try {
     const id = jwt.decode(token).jti;
-    const deletedToken = tokens[id];
-    delete tokens[id];
-    return Promise.resolve(deletedToken);
+    return db('auth-refresh-token').update({ is_token_deleted: 1 }).where('token_id', id)
+    .then(db('auth-refresh-token').first('*').where('token_id', id))
+    .then(tokenObj => Promise.resolve(tokenObj))
+    .catch(Promise.resolve(undefined));
   } catch (error) {
     return Promise.resolve(undefined);
   }
@@ -63,7 +68,11 @@ exports.delete = (token) => {
  * @returns {Promise} resolved with all removed tokens returned
  */
 exports.removeAll = () => {
-  const deletedTokens = tokens;
-  tokens              = Object.create(null);
-  return Promise.resolve(deletedTokens);
+  let returnObjArr = null;
+  return db('auth-refresh-token').select('*')
+  .then((tokenObj) => {
+    returnObjArr = tokenObj;
+    return db('auth-refresh-token').update({ is_token_deleted:1 });
+  })
+  .then(Promise.resolve(returnObjArr));
 };

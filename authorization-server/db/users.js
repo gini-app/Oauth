@@ -34,11 +34,7 @@ const users = [{
  */
 // exports.find = id => Promise.resolve(users.find(user => user.id === id));
 
-exports.find = (id) => {
-  return db.from('auth-users').first('*').where('user_id', id).then(row => {
-    return Promise.resolve(row);
-  })
-};
+exports.find = id => db.from('auth-users').first('*').where('user_id', id).then(row => Promise.resolve(row));
 /**
  * Returns a user if it finds one, otherwise returns null if a user is not found.
  * @param   {String}   username - The unique user name to find
@@ -49,12 +45,7 @@ exports.find = (id) => {
 exports.findByUsername = username =>
   Promise.resolve(users.find(user => user.username === username));
   */
-exports.findByUsername = (username) => {
-  return db.from('auth-users').first('*').where('username', username).then((row) => {
-    // console.log(row);
-    return Promise.resolve(row);
-  });
-};
+exports.findByUsername = username => db.from('auth-users').first('*').where('username', username).then(row => Promise.resolve(row));
 
 /**
  * Returns a user if it finds one, otherwise returns null if a user is not found.
@@ -72,4 +63,3 @@ exports.register = (username, password, name, birthday,  deviceId) => {
   })
   .then(userId => db.from('auth-users').first('username', 'name', 'birthday').where('user_id', userId))
   .then(userObj => Promise.resolve(userObj));
-};

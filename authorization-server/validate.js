@@ -36,7 +36,6 @@ validate.logAndThrow = (msg) => {
 validate.user = (user, password) => {
   console.log('here cp1');
   let theUser = validate.userExists(user);
-  console.log(theUser);
   if(theUser){
     console.log('here bcrypt');
     return bcrypt.compare(password, theUser.password).then((result) => {

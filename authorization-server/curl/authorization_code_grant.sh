@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Curl example of getting the authorization code grant.
-# Typically you will be setup to not have to use the --insecure flag  
+# Typically you will be setup to not have to use the --insecure flag
 # See Authorization Code Grant at: https://tools.ietf.org/html/rfc6749#section-4.1
 
 # Start the server with 'npm start' before running this command
@@ -14,8 +14,8 @@
 #   "token_type" : "Bearer"
 # }
 
-server=https://localhost:3000
-username=bob
+server=http://localhost:8081
+username=something4
 password=secret
 clientid=trustedClient
 clientsecret=ssh-otherpassword

@@ -3,6 +3,7 @@
 const jwt = require('jsonwebtoken');
 const db = require('../db');
 const _ = require('lodash');
+
 // The access tokens.
 // You will use these to access your end point data through the means outlined
 // in the RFC The OAuth 2.0 Authorization Framework: Bearer Token Usage
@@ -19,9 +20,11 @@ let tokens = Object.create(null);
  * @returns {Promise} resolved with the token if found, otherwise resolved with undefined
  */
 exports.find = (token) => {
+  console.log('access token find');
   try {
     const id = jwt.decode(token).jti;
-    return Promise.resolve(tokens[id]);
+    return db.from('auth-access-token').first('*').where('access_token_id', id).andWhere('is_token_deleted', 0)
+    .then(refreshTokenObj => Promise.resolve(refreshTokenObj));
   } catch (error) {
     return Promise.resolve(undefined);
   }
@@ -41,7 +44,14 @@ exports.find = (token) => {
 exports.save = (token, expirationDate, userID, clientID, scope) => {
   const id = jwt.decode(token).jti;
   tokens[id] = { userID, expirationDate, clientID, scope };
-  return Promise.resolve(tokens[id]);
+  console.log(expirationDate);
+  console.log('access token save:%s %s %s %s %s', id, expirationDate, userID, clientID, scope);
+  return db('auth-access-token').returning('access_token_id').insert({ access_token_id: id, expiration_date: expirationDate, user_id: userID, client_id: clientID, scope, is_token_deleted: 0 })
+  .then((tokenId) => {
+    console.log('tokenId : %s', tokenId);
+    return db('auth-access-token').first('*').where('access_token_id', tokenId);
+  })
+  .then(tokenObj => Promise.resolve(tokenObj));
 };
 
 /**
@@ -52,9 +62,10 @@ exports.save = (token, expirationDate, userID, clientID, scope) => {
 exports.delete = (token) => {
   try {
     const id = jwt.decode(token).jti;
-    const deletedToken = tokens[id];
-    delete tokens[id];
-    return Promise.resolve(deletedToken);
+    return db('auth-access-token').update({ is_token_deleted: 1 }).where('access_token_id', id)
+    .then(db('auth-access-token').first('*').where('access_token_id', id))
+    .then(tokenObj => Promise.resolve(tokenObj))
+    .catch(Promise.resolve(undefined));
   } catch (error) {
     return Promise.resolve(undefined);
   }
@@ -66,6 +77,21 @@ exports.delete = (token) => {
  * @returns {Promise} resolved with an associative of tokens that were expired
  */
 exports.removeExpired = () => {
+  const now = new Date();
+  let expiredIds = [];
+  return db('auth-access-token').select('*').where({ is_token_deleted:0 })
+  .then((tokenObjArr) => {
+    _.filter(tokenObjArr, (tokenObj) => {
+      const returnValue = tokenObj.expiration_date < now;
+      if (!returnValue) {
+        expiredIds.push(tokenObj.access_token_id);
+      }
+      return returnValue;
+    });
+    return db('auth-access-token').update({ is_token_deleted:1 }).whereIn('access_token_id', expiredIds)
+    .then(Promise.resolved(tokenObjArr));
+  });
+  /*
   const keys    = Object.keys(tokens);
   const expired = keys.reduce((accumulator, key) => {
     if (new Date() > tokens[key].expirationDate) {
@@ -76,6 +102,7 @@ exports.removeExpired = () => {
     return accumulator;
   }, Object.create(null));
   return Promise.resolve(expired);
+  */
 };
 
 /**
@@ -83,7 +110,11 @@ exports.removeExpired = () => {
  * @returns {Promise} resolved with all removed tokens returned
  */
 exports.removeAll = () => {
-  const deletedTokens = tokens;
-  tokens              = Object.create(null);
-  return Promise.resolve(deletedTokens);
+  let returnObjArr = null;
+  return db('auth-access-token').select('*')
+  .then((tokenObj) => {
+    returnObjArr = tokenObj;
+    return db('auth-access-token').update({ is_token_deleted:1 });
+  })
+  .then(Promise.resolve(returnObjArr));
 };

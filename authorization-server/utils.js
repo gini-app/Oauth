@@ -22,6 +22,8 @@ const publicKey = fs.readFileSync(path.join(__dirname, 'certs/certificate.pem'))
  * @return {String} The JWT Token
  */
 exports.createToken = ({ exp = 3600, sub = '' } = {}) => {
+  console.trace('createToken');
+  console.log('sub: %s', sub);
   const token = jwt.sign({
     jti : uuid(),
     sub,
@@ -29,7 +31,7 @@ exports.createToken = ({ exp = 3600, sub = '' } = {}) => {
   }, privateKey, {
     algorithm: 'RS256',
   });
-
+  console.log('token: %s', token);
   return token;
 };
 

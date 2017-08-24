@@ -15,6 +15,7 @@ const passport    = require('passport');
 const utils       = require('./utils');
 const validate    = require('./validate');
 const _           = require('lodash');
+const jwt         = require('jsonwebtoken');
 
 // create OAuth 2.0 server
 const server = oauth2orize.createServer();
@@ -89,7 +90,11 @@ server.exchange(oauth2orize.exchange.code((client, code, redirectURI, done) => {
 server.exchange(oauth2orize.exchange.password((client, username, password, scope, done) => {
   db.users.findByUsername(username)
   .then(user => validate.user(user, password))
-  .then(user => validate.generateTokens({ scope, userID: user.user_id, clientID: client.id }))
+  .then((user) => {
+    console.log('here user');
+    console.log(user);
+  return validate.generateTokens({ scope, userID: user.user_id, clientID: client.id })
+  })
   .then((tokens) => {
     if (tokens === false) {
       return done(null, false);
@@ -131,7 +136,7 @@ server.exchange(oauth2orize.exchange.clientCredentials((client, scope, done) => 
 server.exchange(oauth2orize.exchange.refreshToken((client, refreshToken, scope, done) => {
   db.refreshTokens.find(refreshToken)
   .then(foundRefreshToken => validate.refreshToken(foundRefreshToken, refreshToken, client))
-  .then(foundRefreshToken => validate.generateToken(foundRefreshToken))
+  .then(foundRefreshToken => validate.generateToken({ userID: jwt.decode(foundRefreshToken).sub, clientID: client.id, scope }))
   .then(token => done(null, token, null, expiresIn))
   .catch(() => done(null, false));
 }));

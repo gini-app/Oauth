@@ -192,9 +192,10 @@ validate.isRefreshToken = ({ scope }) => scope != null && scope.indexOf('offline
  * @throws  {Object}  scope    - the scope
  * @returns {Promise} The resolved refresh token after saved
  */
-validate.generateRefreshToken = ({ userId, clientID, scope }) => {
-  const refreshToken = utils.createToken({ sub : userId, exp : config.refreshToken.expiresIn });
-  return db.refreshTokens.save(refreshToken, userId, clientID, scope)
+validate.generateRefreshToken = ({ userID, clientID, scope }) => {
+  console.log('sub2: %s', userID);
+  const refreshToken = utils.createToken({ sub : userID, exp : config.refreshToken.expiresIn });
+  return db.refreshTokens.save(refreshToken, userID, clientID, scope)
   .then(() => refreshToken);
 };
 
@@ -221,6 +222,8 @@ validate.generateToken = ({ userID, clientID, scope }) => {
  */
 validate.generateTokens = (authCode) => {
   if (validate.isRefreshToken(authCode)) {
+    console.log('authcode');
+    console.log(authCode);
     return Promise.all([
       validate.generateToken(authCode),
       validate.generateRefreshToken(authCode),

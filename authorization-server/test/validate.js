@@ -27,9 +27,13 @@ describe('validate', () => {
     });
 
     it('show throw if password does not match', () => {
-      expect(() =>
-        validate.user({ password : 'password' }, 'otherpassword'))
-        .to.throw('User password does not match');
+      validate.user({ user: 'testuser', password: '1234' }, 'otherpassword')
+        .then(() => done())
+        .catch((error) => {
+          console.log(error);
+          expect(error.message).to.equal('User password does not match');
+          done();
+        });
     });
 
     it('show return user if password matches', () => {
@@ -130,11 +134,14 @@ describe('validate', () => {
       .catch(err => expect(err.message).to.eql('User does not exist'));
     });
 
-    it('should return user with valid user', () => {
+    it('should return user with valid user \'user_id\'', () => {
       const token = utils.createToken();
       const user  = { userID   : '1' };
       return validate.token(user, token)
-      .then(returnedUser => expect(returnedUser.id).eql(user.userID));
+      .then(returnedUser => {
+        expect(returnedUser.id).eql(user.user_id);
+        console.log('RETURNED USER', returnedUser);
+      });
     });
 
     it('should return client with valid client', () => {

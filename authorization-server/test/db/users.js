@@ -16,21 +16,21 @@ describe('users', () => {
     users.find('1')
     .then((user) => {
       expect(user).to.contain({
-        id       : '1',
-        username : 'bob',
-        password : 'secret',
-        name     : 'Bob Smith',
+        user_id: 1,
+        username: 'testuser',
+        password: 'testpassword',
+        name: 'tester',
       });
     }));
 
   it('should find a user by username bob', () =>
-    users.findByUsername('bob')
+    users.findByUsername('testuser')
     .then((user) => {
       expect(user).to.contain({
-        id       : '1',
-        username : 'bob',
-        password : 'secret',
-        name     : 'Bob Smith',
+        user_id: 1,
+        username: 'testuser',
+        password: 'testpassword',
+        name: 'tester',
       });
     }));
 });

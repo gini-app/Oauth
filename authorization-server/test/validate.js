@@ -30,20 +30,23 @@ describe('validate', () => {
       validate.user({ user: 'testuser', password: '1234' }, 'otherpassword')
         .then(() => done())
         .catch((error) => {
-          console.log(error);
           expect(error.message).to.equal('User password does not match');
           done();
         });
     });
 
     it('show return user if password matches', () => {
-      expect(validate.user({ password: 'password' }, 'password'))
-        .to.eql({ password : 'password' });
+      validate.user({ password: 'testpassword' }, 'password')
+      .then((response) => {
+        expect(response).to.equal({ password: 'testpassword' });
+      });
     });
 
     it('show return user if password matches with data', () => {
-      expect(validate.user({ user: 'yo', password: 'password' }, 'password'))
-        .to.eql({ user : 'yo', password : 'password' });
+      validate.user({ user: 'testuser', password: 'testpassword' }, 'password')
+      .then((response) => {
+        expect(response).to.equal({ user: 'testuser', password: 'testpassword' });
+      });
     });
   });
 

@@ -43,6 +43,7 @@ exports.find = (token) => {
  */
 exports.save = (token, expirationDate, userID, clientID, scope) => {
   const id = jwt.decode(token).jti;
+  console.trace('exports.save');
   tokens[id] = { userID, expirationDate, clientID, scope };
   console.log(expirationDate);
   console.log('access token save:%s %s %s %s %s', id, expirationDate, userID, clientID, scope);

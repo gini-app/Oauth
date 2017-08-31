@@ -206,10 +206,9 @@ validate.generateRefreshToken = ({ userID, clientID, scope }) => {
  * @returns {Promise}  The resolved refresh token after saved
  */
 validate.generateToken = ({ userID, clientID, scope }) => {
-  const token      = utils.createToken({ sub : userID, exp : config.token.expiresIn });
   const expiration = config.token.calculateExpirationDate();
-  return db.accessTokens.save(token, expiration, userID, clientID, scope)
-  .then(() => token);
+  return utils.createToken({ sub : userID, exp : config.token.expiresIn })
+  .then(token => db.accessTokens.save(token, expiration, userID, clientID, scope).then(token));
 };
 
 /**

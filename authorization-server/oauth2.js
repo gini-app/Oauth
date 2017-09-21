@@ -88,14 +88,19 @@ server.exchange(oauth2orize.exchange.code((client, code, redirectURI, done) => {
  * application issues an access token on behalf of the user who authorized the code.
  */
 server.exchange(oauth2orize.exchange.password((client, username, password, scope, done) => {
+  console.log('cp0');
   return db.users.findByUsername(username)
   .then(user => validate.user(user, password))
   .then((user) => {
     console.log('here user');
     console.log(user);
-    return validate.generateTokens({ scope, userID: user.user_id, clientID: client.id });
+    const tempToken = validate.generateTokens({ scope, userID: user.user_id, clientID: client.id });
+    console.log('tmp: %s', tempToken);
+    return tempToken;
   })
   .then((tokens) => {
+    console.log('cp0->token');
+    console.log(tokens);
     if (tokens === false) {
       return done(null, false);
     }

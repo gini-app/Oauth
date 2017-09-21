@@ -192,8 +192,9 @@ validate.isRefreshToken = ({ scope }) => scope != null && scope.indexOf('offline
  * @returns {Promise} The resolved refresh token after saved
  */
 validate.generateRefreshToken = ({ userID, clientID, scope }) => {
-  console.log('sub2: %s', userID);
+  console.log('refreshToken sub: %s', userID);
   const refreshToken = utils.createToken({ sub : userID, exp : config.refreshToken.expiresIn });
+  console.log('--- %s', refreshToken);
   return db.refreshTokens.save(refreshToken, userID, clientID, scope)
   .then(() => refreshToken);
 };
@@ -207,8 +208,9 @@ validate.generateRefreshToken = ({ userID, clientID, scope }) => {
  */
 validate.generateToken = ({ userID, clientID, scope }) => {
   const expiration = config.token.calculateExpirationDate();
-  return utils.createToken({ sub : userID, exp : config.token.expiresIn })
-  .then(token => db.accessTokens.save(token, expiration, userID, clientID, scope).then(token));
+  const token = utils.createToken({ sub : userID, exp : config.token.expiresIn });
+  return db.accessTokens.save(token, expiration, userID, clientID, scope)
+  .then(() => token);
 };
 
 /**
@@ -225,7 +227,14 @@ validate.generateTokens = (authCode) => {
     return Promise.all([
       validate.generateToken(authCode),
       validate.generateRefreshToken(authCode),
-    ]);
+    ]).then((p) => {
+      console.log('generateTokens');
+      console.log(p);
+      return p;
+    })
+    .catch((error) => {
+      console.error(error);
+    });
   }
   return Promise.all([validate.generateToken(authCode)]);
 };

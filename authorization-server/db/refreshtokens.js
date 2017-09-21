@@ -2,7 +2,7 @@
 
 const jwt = require('jsonwebtoken');
 const db = require('../mysql');
-
+const _ = require('lodash');
 // The refresh tokens.
 // You will use these to get access tokens to access your end point data through the means outlined
 // in the RFC The OAuth 2.0 Authorization Framework: Bearer Token Usage
@@ -41,8 +41,18 @@ exports.find = (token) => {
 exports.save = (token, userID, clientID, scope) => {
   const id = jwt.decode(token).jti;
   console.log('refreshtoken save');
-  return db('auth-refresh-token').returning('token_id').insert({ token_id: id, user_id: userID, client_id: clientID, scope, is_token_deleted: 0 })
-  .then(tokenId => db('auth-refresh-token').first('*').where('token_id', tokenId))
+  console.log('refresh-token %s, %s, %s, %s', id, userID, clientID, scope);
+  const sql = db('auth-refresh-token').insert({ refresh_token_id: id, user_id: userID, client_id: clientID, scope: JSON.stringify(scope), is_token_deleted: 0 });
+  console.log(sql.toSQL());
+  return sql
+  .then(() => db('auth-refresh-token').first('*').where('refresh_token_id', id))
+  .then((tokenObj) => {
+    let returnObj = _.clone(tokenObj);
+    console.log('--refresh-token');
+    console.log(tokenObj.scope);
+    returnObj.scope = JSON.parse(tokenObj.scope);
+    return returnObj;
+  })
   .then(tokenObj => Promise.resolve(tokenObj));
 };
 
@@ -54,8 +64,8 @@ exports.save = (token, userID, clientID, scope) => {
 exports.delete = (token) => {
   try {
     const id = jwt.decode(token).jti;
-    return db('auth-refresh-token').update({ is_token_deleted: 1 }).where('token_id', id)
-    .then(db('auth-refresh-token').first('*').where('token_id', id))
+    return db('auth-refresh-token').update({ is_token_deleted: 1 }).where('refresh_token_id', id)
+    .then(db('auth-refresh-token').first('*').where('refresh_token_id', id))
     .then(tokenObj => Promise.resolve(tokenObj))
     .catch(Promise.resolve(undefined));
   } catch (error) {

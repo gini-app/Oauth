@@ -1,7 +1,7 @@
 'use strict';
 
 const jwt = require('jsonwebtoken');
-const db = require('../db');
+const db = require('../mysql');
 const _ = require('lodash');
 
 // The access tokens.
@@ -47,12 +47,24 @@ exports.save = (token, expirationDate, userID, clientID, scope) => {
   tokens[id] = { userID, expirationDate, clientID, scope };
   console.log(expirationDate);
   console.log('access token save:%s %s %s %s %s', id, expirationDate, userID, clientID, scope);
-  return db('auth-access-token').returning('access_token_id').insert({ access_token_id: id, expiration_date: expirationDate, user_id: userID, client_id: clientID, scope, is_token_deleted: 0 })
-  .then((tokenId) => {
-    console.log('tokenId : %s', tokenId);
-    return db('auth-access-token').first('*').where('access_token_id', tokenId);
+  console.log(JSON.stringify(scope));
+  const insertStatement = db('auth-access-token').insert({ access_token_id: id, expiration_date: expirationDate, user_id: userID, client_id: clientID, scope: JSON.stringify(scope), is_token_deleted: 0 });
+  console.log(insertStatement.toSQL());
+  return insertStatement
+  .catch((error) => {
+    console.error(error);
   })
-  .then(tokenObj => Promise.resolve(tokenObj));
+  .then(() => {
+    console.log('tokenId : %s', id);
+    return db('auth-access-token').first('*').where('access_token_id', id);
+  })
+  .then((result) => {
+    let returnValue = _.clone(result);
+    returnValue.scope = JSON.parse(result.scope);
+    console.log('cp1234');
+    return Promise.resolve(returnValue);
+  });
+  // .then(tokenObj => {return Promise.resolve(tokenObj)});
 };
 
 /**

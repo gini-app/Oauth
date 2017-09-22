@@ -230,10 +230,10 @@ exports.token = [
  */
 exports.register = [
   (req, res, next) => {
-    if (_.has(req, 'body') && _.has(req.body, 'username') && _.has(req.body, 'password') && _.has(req.body, 'name') && _.has(req.body, 'deviceId')) {
+    if (_.has(req, 'body') && _.has(req.body, 'username') && _.has(req.body, 'password') && _.has(req.body, 'deviceId')) {
       return db.users.findByUsername(req.body.username).then((userObj) => {
         if (_.isUndefined(userObj) || _.isNull(userObj)) {
-          return db.users.register(req.body.username, req.body.password, req.body.name, req.body.deviceId).then((returnUserObj) => {
+          return db.users.register(req.body.username, req.body.password, req.body.name, req.body.birthday, req.body.deviceId).then((returnUserObj) => {
             res.json(_.assign({}, returnUserObj, { status:'success' }));
           });
         } else {
@@ -245,7 +245,7 @@ exports.register = [
     } else {
       console.log(req);
       console.log('error');
-      res.json(_.assign({}, req.body, { status:'error', error:'body/username/name/deviceId are mandatory' }));
+      res.json(_.assign({}, req.body, { status:'error', error:'body/username/deviceId are mandatory' }));
     }
   },
 ];

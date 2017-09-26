@@ -70,6 +70,6 @@ exports.register = (username, password, name, birthday,  deviceId) => {
   return bcrypt.hash(password, 12).then((bcryptPassword) => {
     return db.from('auth-users').returning('*').insert({ username, password: bcryptPassword, name, birthday, device_id: deviceId });
   })
-  .then(userId => db.from('auth-users').first('*').where('user_id', userId))
+  .then(userId => db.from('auth-users').first('username', 'name', 'birthday').where('user_id', userId))
   .then(userObj => Promise.resolve(userObj));
 };

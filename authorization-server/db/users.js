@@ -73,3 +73,21 @@ exports.register = (username, password, name, birthday,  deviceId) => {
   .then(userId => db.from('auth-users').first('username', 'name', 'birthday').where('user_id', userId))
   .then(userObj => Promise.resolve(userObj));
 };
+
+
+exports.setPassword = (username, password) => bcrypt.hash(password, 12)
+  .then(bcryptPassword => db.from('auth-users').returning('*').update({ password: bcryptPassword }).where('username', username))
+  .then((userId) => {
+    return db.from('auth-users').first('username', 'name', 'birthday').where('username', username);
+  })
+  .then(userObj => Promise.resolve(userObj))
+  .catch(error => console.error(error));
+
+
+exports.setUsername = (username, newUsername) => db.from('auth-users').returning('*').update({ username: newUsername }).where('username', username)
+  .then((userId) => {
+    return db.from('auth-users').first('username', 'name', 'birthday').where('username', newUsername);
+  })
+  .then(userObj => Promise.resolve(userObj))
+  .catch(error => console.error(error));
+

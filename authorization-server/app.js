@@ -60,6 +60,8 @@ app.get('/api/userinfo',   user.info);
 app.get('/api/clientinfo', client.info);
 
 app.post('/oauth/register', oauth2.register);
+app.post('/oauth/changePassword', oauth2.changePassword);
+app.post('/oauth/changeUsername', oauth2.changeUsername);
 
 // Mimicking google's token info endpoint from
 // https://developers.google.com/accounts/docs/OAuth2UserAgent#validatetoken

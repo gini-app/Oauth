@@ -59,9 +59,11 @@ app.post('/oauth/token',               oauth2.token);
 app.get('/api/userinfo',   user.info);
 app.get('/api/clientinfo', client.info);
 
-app.post('/oauth/register', oauth2.register);
-app.post('/oauth/changePassword', oauth2.changePassword);
-app.post('/oauth/changeUsername', oauth2.changeUsername);
+app.post('/api/register', user.register);
+app.post('/api/changePassword', user.changePassword);
+app.post('/api/changeUsername', user.changeUsername);
+app.post('/api/getPasswordToken', user.getPasswordToken);
+app.post('/api/resetPassword', user.resetPassword);
 
 // Mimicking google's token info endpoint from
 // https://developers.google.com/accounts/docs/OAuth2UserAgent#validatetoken
